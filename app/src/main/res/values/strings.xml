@@ -1,9 +1,11 @@
 <resources>
-    <string name="app_name">GetUSDRate</string>
+    <string name="app_name">Котировка ETH</string>
     <string name="refresh_rate">refresh</string>
     <string name="usd_rate">Current rate:</string>
     <string name="target_rate_empty">Target rate is empty</string>
     <string name="current_rate_empty">Current rate is empty</string>
     <string name="subscribe">subscribe</string>
     <string name="target_rate">Target rate</string>
+    <string name="api_key">e8eb8873de9842290ec5be3dcd9e77761132bc79947e94f0934854fa7b8bd99e</string>
+    <string name="currency">ETH</string>
 </resources>

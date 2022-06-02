@@ -1,44 +1,50 @@
 package ru.samsung.itacademy.mdev.getusdrate
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 
 
 class RateCheckService : Service() {
     val handler = Handler(Looper.getMainLooper())
     var rateCheckAttempt = 0
-    lateinit var startRate: BigDecimal
-    lateinit var targetRate: BigDecimal
     val rateCheckInteractor = RateCheckInteractor()
+    private val context = this
 
     val rateCheckRunnable: Runnable = Runnable {
-        // Write your code here. Check number of attempts and stop service if needed
         requestAndCheckRate()
     }
 
     private fun requestAndCheckRate() {
         // Write your code here
+        GlobalScope.launch(Dispatchers.Main) {
+            val rate = rateCheckInteractor.requestRate()
+            val intent = Intent()
+            intent.action = BROADCAST_ACTION
+            intent.putExtra("rate", rate)
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+            rateCheckAttempt += 1
+            handler.postDelayed(rateCheckRunnable, RATE_CHECK_INTERVAL * rateCheckAttempt)
+        }
     }
 
     override fun onBind(p0: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startRate = BigDecimal(intent?.getStringExtra(ARG_START_RATE))
-        targetRate = BigDecimal(intent?.getStringExtra(ARG_TARGET_RATE))
-
-        Log.d(TAG, "onStartCommand startRate = $startRate targetRate = $targetRate")
-
-        handler.post(rateCheckRunnable)
+        handler.postDelayed(rateCheckRunnable, RATE_CHECK_INTERVAL * rateCheckAttempt)
 
         return START_STICKY
     }
@@ -51,17 +57,11 @@ class RateCheckService : Service() {
 
     companion object {
         const val TAG = "RateCheckService"
-        const val RATE_CHECK_INTERVAL = 5000L
-        const val RATE_CHECK_ATTEMPTS_MAX = 100
+        const val RATE_CHECK_INTERVAL = 500L
+        const val BROADCAST_ACTION = "RateUpdates"
 
-        const val ARG_START_RATE = "ARG_START_RATE"
-        const val ARG_TARGET_RATE = "ARG_TARGET_RATE"
-
-        fun startService(context: Context, startRate: String, targetRate: String) {
-            context.startService(Intent(context, RateCheckService::class.java).apply {
-                putExtra(ARG_START_RATE, startRate)
-                putExtra(ARG_TARGET_RATE, targetRate)
-            })
+        fun startService(ctx: Context) {
+            ctx.startService(Intent(ctx, RateCheckService::class.java))
         }
 
         fun stopService(context: Context) {

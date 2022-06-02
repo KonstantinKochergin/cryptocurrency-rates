@@ -10,7 +10,8 @@ class RateCheckInteractor {
 
     suspend fun requestRate(): String {
         return withContext(Dispatchers.IO) {
-            val result = networkClient.request(MainViewModel.USD_RATE_URL)
+            val result = networkClient.request(MainViewModel.ETH_RATE_URL)
+            Log.d("mytag", result.toString())
             if (!result.isNullOrEmpty()) {
                 parseRate(result)
             } else {
@@ -22,9 +23,7 @@ class RateCheckInteractor {
     private fun parseRate(jsonString: String): String {
         try {
             return JSONObject(jsonString)
-                .getJSONObject("rates")
-                .getJSONObject("USDRUB")
-                .getString("rate")
+                .getString("RUB")
         } catch (e: Exception) {
 
             Log.e("RateCheckInteractor", "", e)

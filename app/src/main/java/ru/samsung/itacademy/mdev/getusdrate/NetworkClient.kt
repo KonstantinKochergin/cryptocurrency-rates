@@ -1,5 +1,6 @@
 package ru.samsung.itacademy.mdev.getusdrate
 
+import android.content.res.Resources
 import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -16,6 +17,7 @@ class NetworkClient {
     fun request(url: String): String? {
         val requestBuilder = Request.Builder()
             .url(url)
+            .addHeader("Apikey", "e8eb8873de9842290ec5be3dcd9e77761132bc79947e94f0934854fa7b8bd99e")
             .build()
 
         try {
